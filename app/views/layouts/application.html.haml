@@ -1,0 +1,39 @@
+!!! 5
+%html
+  %head
+    %title
+      = @pagetitle ? "Brick | #{@pagetitle}" : "Brick"
+    = stylesheet_link_tag "application"
+    = javascript_include_tag "application"
+    = csrf_meta_tags
+  %body
+    %header
+      %nav
+        %ul
+          %li
+            %a(href="/") Calendar
+          %li
+            %a(href="/locale") Locale
+          %li
+            %a(href="/maag") Career
+          - [1999..2004].each do |year|
+            %li
+              %a(href="/maag/#{year}")
+                = year
+          - [2005..2007].each do |year|
+            %li
+              %a(title="Records pending")
+                = year
+          - [2008..2011].each do |year|
+            %li
+              %a(href="/maag/#{year}")
+                = year
+    .content
+      = yield
+    %footer
+      %p 
+        copyright 2009-2011 triode
+        |
+        %a(href="mailto:triode@ftso.net") triode@ftso.net
+        |
+        all rights reversed

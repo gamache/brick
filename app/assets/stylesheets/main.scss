@@ -1,0 +1,31 @@
+$width: 960px;
+$html_bgcolor: #020;
+$body_bgcolor: #dfe;
+$fgcolor: #000;
+
+html {
+  background-color: $html_bgcolor;
+}
+
+body {
+  background-color: $body_bgcolor;
+  color: $fgcolor;
+  width: $width;
+  margin: 10px auto 10px auto;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+// zebra stripe
+thead,tr:even {
+  background-color: $body_bgcolor * 0.8;
+}
+tr:hover {
+  background-color: $body_bgcolor * 0.9;
+}
+
+
+.strike { text-decoration: line-through; }
+
+
+
