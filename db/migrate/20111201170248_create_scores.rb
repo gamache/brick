@@ -5,6 +5,7 @@ class CreateScores < ActiveRecord::Migration
       t.integer :game_id
 
       t.datetime :date
+      t.integer :night  ## 1..30
       t.integer :season ## the year e.g. 2011
 
       t.integer :warps

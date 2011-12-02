@@ -14,16 +14,19 @@
 ActiveRecord::Schema.define(:version => 20111201170320) do
 
   create_table "fudges", :force => true do |t|
-    t.integer  "player_id",       :null => false
-    t.integer  "season",          :null => false
-    t.string   "description"
+    t.integer  "player_id"
+    t.integer  "season"
+    t.string   "notes"
     t.integer  "warps"
+    t.integer  "games"
+    t.integer  "nights"
     t.integer  "wins"
     t.integer  "cfbs"
     t.integer  "come_ons"
     t.integer  "wimps"
     t.integer  "mystery_factors"
     t.integer  "gold_stars"
+    t.integer  "nights_won"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -46,6 +49,7 @@ ActiveRecord::Schema.define(:version => 20111201170320) do
     t.integer  "player_id",      :null => false
     t.integer  "game_id"
     t.datetime "date"
+    t.integer  "night"
     t.integer  "season"
     t.integer  "warps"
     t.boolean  "win"
