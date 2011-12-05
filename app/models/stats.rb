@@ -1,39 +1,41 @@
+require 'pp'
 class Stats < Hash
 
   ## Stats.all returns a stats hash encompassing all seasons
   def self.all
     season_stats = Season.all.map {|s| for_season(s)}
     overall_stats = merge_stats!(season_stats)
-    overall_stats.apply_fudges!(Fudge.where(:season => nil))
-    overall_stats.calculate!
+    overall_stats.
+      apply_fudges!(Fudge.where(:season => nil))
+      calculate!
   end
 
   def self.for_season(season)
     season = Season.new(:year => season) unless season.is_a?(Season)
 
     stats = Stats.new
-    puts stats.class
     scores = Score.where(:season => season.name).all
     fudges = Fudge.where(:season => season.name).all
 
     scores.each do |score|
       h = stats[score.player_id]
       h[:warps] += score.warps
+      h[:wimps] += score.wimps
       h[:games] += 1
       h[:dates][score.date] += 1
       h[:wins]            += score.win            ? 1 : 0
       h[:cfbs]            += score.cfb            ? 1 : 0
       h[:come_ons]        += score.come_on        ? 1 : 0
-      h[:wimps]           += score.wimp           ? 1 : 0
       h[:mystery_factors] += score.mystery_factor ? 1 : 0
     end
 
-    stats.apply_fudges!(fudges)
-
-    stats.calculate!
-
-    stats
+    stats.
+      apply_fudges!(fudges).
+      calculate!.
+      convert_player_ids_to_names!
   end
+
+  def overall; self[:overall] end
 
 
 
@@ -42,19 +44,19 @@ class Stats < Hash
   def self.new
     self.orig_new do |h,k|
       h[k] = Hash[:warps => 0,
-              :games => 0,
-              :nights => 0,
+                  :games => 0,
+                  :nights => 0,
 
-              ## :dates holds the number of player-games per date
-              ## and :nights gets computed from it, for players
-              :dates => Hash.new(0),  ## this will be reduced to 'nights' below
+                  ## :dates holds the number of player-games per date
+                  ## and :nights gets computed from it, for players
+                  :dates => Hash.new(0),
 
-              :wins => 0,
-              :cfbs => 0,
-              :come_ons => 0,
-              :wimps => 0,
-              :mystery_factors => 0,
-              :gold_stars => 0]
+                  :wins => 0,
+                  :cfbs => 0,
+                  :come_ons => 0,
+                  :wimps => 0,
+                  :mystery_factors => 0,
+                  :gold_stars => 0]
     end
   end
 
@@ -95,45 +97,71 @@ class Stats < Hash
   ## calculate! computes per-player and overall computed stats.
   ## Non-integer computed stats are also returned as strings.
   def calculate!
-    _ = self[:overall] # we must create this entry before iterating
-                       # on our own keys, otherwise ruby gets confused
+    ov = self[:overall]
 
     self.each do |player_id, st|
-      ## update overall stats
-      [:warps, :cfbs, :come_ons, :wimps, :mystery_factors, :gold_stars].
-        each {|f| self[:overall][f] += st[f] }
-      self[:overall][:games] += st[:wins]
-      st[:dates].each{|k,v| self[:overall][:dates][k] += v}
+      next if player_id == :overall
+
+      ## accumulate overall stats
+      [:warps, :wins, :cfbs, :come_ons,
+       :wimps, :mystery_factors, :gold_stars]. each do |field|
+        ov[field] += st[field]
+      end
+      st[:dates].each {|date,games| ov[:dates][date] += games}
 
       ## calculate computed stats for player
       st[:nights] = st[:dates].keys.length
       st[:gold_stars] = 1 if st[:nights] == 29
-      st[:warps_per_game]  = st[:warps] / st[:games]  rescue 0
-      st[:warps_per_night] = st[:warps] / st[:nights] rescue 0
-      st[:games_per_night] = st[:games] / st[:nights] rescue 0
-      st[:wins_per_night]  = st[:wins]  / st[:nights] rescue 0
-      st[:wins_per_game]   = st[:wins]  / st[:games]  rescue 0
+      st[:warps_per_game]  = 1.0 * st[:warps] / st[:games]  rescue 0
+      st[:warps_per_night] = 1.0 * st[:warps] / st[:nights] rescue 0
+      st[:games_per_night] = 1.0 * st[:games] / st[:nights] rescue 0
+      st[:wins_per_night]  = 1.0 * st[:wins]  / st[:nights] rescue 0
+      st[:wins_per_game]   = 1.0 * st[:wins]  / st[:games]  rescue 0
 
       ## format non-integer stats
-      [:warps_per_game, :warps_per_night, :games_per_night].each do |f|
+      [:warps_per_game,
+       :warps_per_night,
+       :games_per_night,
+       :wins_per_night,
+       :wins_per_game].each do |f|
         st["#{f}_str".to_sym] = sprintf "%.3f", st[f]
       end
-      [:wins_per_night, :wins_per_game].each do |f|
-        st["#{f}_str".to_sym] = sprintf "%.2f%%", st[f]*100
-      end
+      # [:wins_per_night, :wins_per_game].each do |f|
+      #   st["#{f}_str".to_sym] = sprintf "%.2f%%", st[f]*100
+      # end
     end
 
     ## update overall computed stats
     st = self[:overall]
+    st[:games] = st[:wins]
     st[:nights] = st[:dates].keys.length
-    st[:warps_per_game]  = st[:warps] / st[:games]  rescue 0
-    st[:warps_per_night] = st[:warps] / st[:nights] rescue 0
-    st[:games_per_night] = st[:games] / st[:nights] rescue 0
+    st[:warps_per_game]  = 1.0 * st[:warps] / st[:games]  rescue 0
+    st[:warps_per_night] = 1.0 * st[:warps] / st[:nights] rescue 0
+    st[:games_per_night] = 1.0 * st[:games] / st[:nights] rescue 0
     [:warps_per_game, :warps_per_night, :games_per_night].each do |f|
       st["#{f}_str".to_sym] = sprintf "%.3f", st[f]
     end
 
     self
+  end
+
+  def convert_player_ids_to_names!
+    ids = self.keys.select{|k| k.is_a?(Numeric)}
+    ids.each do |id|
+      p = Player.find(id)
+      self[p.name] = self.delete(id)
+    end
+    self
+  end
+
+  ## sort by warps
+  def to_a
+    a = []
+    a.push({:player => nil, :overall => true}.merge(self[:overall]))
+    (self.keys - [:overall]).
+      sort {|x,y| self[y][:warps] <=> self[x][:warps]}.
+      each {|k| a.push({:player => k}.merge(self[k]))}
+    a
   end
 
 end

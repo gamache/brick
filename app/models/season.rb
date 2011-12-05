@@ -67,10 +67,8 @@ class Season
           win = !! game.match(/!/)
           cfb = !! game.match(/cfb/)
           come_on = !! game.match(/on/)
-          wimp = !! game.match(/w/)
           mystery_factor = !! game.match(/mf/)
-          date = Date.new(self.year, 11, night.to_i)
-          puts date.strftime('%F')
+          wimps = game.gsub(/[^w]/,'').length
           s = Score.new(
             :player_id => player.id,
             :season => self.year,
@@ -79,9 +77,10 @@ class Season
             :win => win,
             :cfb => cfb,
             :come_on => come_on,
-            :wimp => wimp,
+            :wimps => wimps,
             :mystery_factor => mystery_factor
           )
+          puts "\n\n\n\n\n#{s.inspect}\n\n\n\n\n" if wimps > 0
           s.save!
         end
       end
