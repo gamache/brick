@@ -4,10 +4,9 @@ class Stats < Hash
   ## Stats.all returns a stats hash encompassing all seasons
   def self.all
     season_stats = Season.all.map {|s| for_season(s)}
-    overall_stats = merge_stats!(season_stats)
-    overall_stats.
-      apply_fudges!(Fudge.where(:season => nil))
-      calculate!
+    fudged_stats = Stats.new.apply_fudges!(Fudge.where(:season => nil).all)
+    stats = season_stats + [fudged_stats]
+    overall_stats = merge_stats(stats)
   end
 
   def self.for_season(season)
@@ -48,7 +47,7 @@ class Stats < Hash
                   :nights => 0,
 
                   ## :dates holds the number of player-games per date
-                  ## and :nights gets computed from it, for players
+                  ## and :nights gets computed from it
                   :dates => Hash.new(0),
 
                   :wins => 0,
@@ -60,19 +59,38 @@ class Stats < Hash
     end
   end
 
-  ## merge_stats! merges multiple Stats objects, destroying at least
-  ## one in the process.  calculate! should be run on the resulting
-  ## Stats object.
-  def self.merge_stats!(*stats_list)
+  ## merge_stats merges multiple Stats objects.  calculate! should be 
+  ## run on the resulting Stats object.
+  def self.merge_stats(*stats_list)
     ## make splat notation optional
     stats_list = stats_list.first if stats_list.first.is_a?(Array)
 
     ## accumulate stats
-    merged_stats = stats_list.pop
+    merged_stats = Stats.new
     stats_list.each do |stats|
       stats.each do |player_id, stat_hash|
-        stat_hash.each {|k,v| merged_stats[player_id][k] += v}
+        [:warps, :games, :nights, :wins, :cfbs, 
+         :come_ons, :wimps, :mystery_factors, :gold_stars].each do |k|
+          merged_stats[player_id][k] += stat_hash[k]
+        end
+
+        stat_hash[:dates].each do |date,games|
+          merged_stats[player_id][:dates][date] += games
+        end
+
+        ## the :nights field gets destroyed during calculate,
+        ## so we store it as :nights_real so we can reinstate it
+        merged_stats[player_id][:nights_real] = 
+          merged_stats[player_id][:nights]
       end
+    end
+
+    merged_stats.calculate!
+
+    ## now restore the real night counts
+    merged_stats.each do |player, stat_hash|
+      next if player == :overall
+      stat_hash[:nights] = stat_hash.delete(:nights_real)
     end
 
     merged_stats
@@ -87,7 +105,7 @@ class Stats < Hash
       player_id = f.player_id || :overall
       [:warps, :games, :nights, :wins, :cfbs, :come_ons,
        :wimps, :mystery_factors, :gold_stars].each do |field|
-        self[player_id][field] += f.send(field)
+        self[player_id][field] += f.send(field).to_i
        end
     end
 
@@ -110,7 +128,7 @@ class Stats < Hash
       st[:dates].each {|date,games| ov[:dates][date] += games}
 
       ## calculate computed stats for player
-      st[:nights] = st[:dates].keys.length
+      st[:nights] += st[:dates].keys.length # if st[:nights] == 0
       st[:gold_stars] = 1 if st[:nights] == 29
       st[:warps_per_game]  = 1.0 * st[:warps] / st[:games]  rescue 0
       st[:warps_per_night] = 1.0 * st[:warps] / st[:nights] rescue 0
@@ -135,6 +153,7 @@ class Stats < Hash
     st = self[:overall]
     st[:games] = st[:wins]
     st[:nights] = st[:dates].keys.length
+    st[:nights] = 29 if st[:nights] == 0 ## provide sane default
     st[:warps_per_game]  = 1.0 * st[:warps] / st[:games]  rescue 0
     st[:warps_per_night] = 1.0 * st[:warps] / st[:nights] rescue 0
     st[:games_per_night] = 1.0 * st[:games] / st[:nights] rescue 0

@@ -19,3 +19,5 @@ group :test do
   gem 'mocha'
   gem 'factory_girl'
 end
+
+gem 'minitest'

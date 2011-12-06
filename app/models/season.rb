@@ -2,18 +2,17 @@ class Season
   attr_reader :year
   def name; year end
 
+  def self.[](year)
+    new(:year => year)
+  end
+
   def initialize(attrs={})
     y = attrs[:year] || attrs[:name]
     @year = y.to_i
   end
 
   def self.all
-    years = Rails.cache.fetch("years") do
-      ActiveRecord::Base.connection.
-        select_all('SELECT season FROM scores GROUP BY season').
-        values
-    end
-    years.map {|y| Season.new(:year => y)}
+    (1999 .. Time.now.year).map {|y| Season.new(:year => y)}
   end
 
   def stats;            Stats.for_season(self) end
@@ -52,12 +51,17 @@ class Season
   end
 
   def import_scores_file(scores_file, night=nil)
+    ## attempt to determine night from filename, if not given
     if !night
       m = scores_file.match(/(\d+)$/)
       night = m[1] rescue nil
     end
+
     File.open(scores_file, 'r') do |scores|
-      scores.each_line do |line|
+      scores.each_with_index do |line, linenum|
+        next if line.match(/^#/)
+        next if line.blank?
+
         games = line.split(/\s+/)
         player = Player.named(games.shift)
         games.map(&:downcase).each do |game|
@@ -80,7 +84,6 @@ class Season
             :wimps => wimps,
             :mystery_factor => mystery_factor
           )
-          puts "\n\n\n\n\n#{s.inspect}\n\n\n\n\n" if wimps > 0
           s.save!
         end
       end
