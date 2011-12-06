@@ -1,0 +1,78 @@
+%h1
+  November Games
+  = @year
+  at a Glance
+
+- overall_stats = @stats_array.shift
+%p.overall-stats
+  = overall_stats[:warps]
+  warps in
+  = overall_stats[:games]
+  games over
+  = overall_stats[:nights]
+  nights.
+  %br/
+  = overall_stats[:warps_per_game_str]
+  warps per game -
+  = overall_stats[:warps_per_night_str]
+  warps per night - 
+  = overall_stats[:games_per_night_str]
+  games per night
+
+%script
+  $(document).ready(function(){ $('#maag').tablesorter(); });
+
+%table.maag.tablesorter#maag
+  %thead
+    %tr
+      %th
+      %th Player
+      %th Warps
+      %th Games
+      %th Nights
+      %th Wins
+      %th Nights Won
+      %th CFBs
+      %th Come Ons
+      %th Wimps
+      %th Warps/ Game
+      %th Warps/ Night
+      %th Games/ Night
+      %th Wins/ Game
+      %th High Night
+  %tbody
+    - @stats_array.each_with_index do |st, idx|
+      %tr
+        %td.index
+          = idx+1
+        %td.player
+          = st[:player]
+        %td.warps
+          = st[:warps]
+        %td.games
+          = st[:games]
+        %td.nights
+          = st[:nights]
+        %td.wins
+          = st[:wins]
+        %td.nights_won
+          = st[:nights_won]
+        %td.cfbs
+          = st[:cfbs]
+        %td.come_ons
+          = st[:come_ons]
+        %td.wimps
+          = st[:wimps]
+        %td.warps_per_game
+          = st[:warps_per_game_str]
+        %td.warps_per_night
+          = st[:warps_per_night_str]
+        %td.games_per_night
+          = st[:games_per_night_str]
+        %td.wins_per_game
+          = st[:wins_per_game_str]
+        %td.high_night
+          = st[:high_night]
+
+
+

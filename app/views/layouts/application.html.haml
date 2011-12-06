@@ -3,6 +3,7 @@
   %head
     %title
       = @pagetitle ? "Brick | #{@pagetitle}" : "Brick"
+    %link(rel='icon' type='image/png' href='/images/brick.png')
     = stylesheet_link_tag "application"
     = javascript_include_tag "application"
     = csrf_meta_tags
@@ -16,15 +17,15 @@
             %a(href="/locale") Locale
           %li
             %a(href="/maag") Career
-          - [1999..2004].each do |year|
+          - (1999..2004).each do |year|
             %li
               %a(href="/maag/#{year}")
                 = year
-          - [2005..2007].each do |year|
+          - (2005..2007).each do |year|
             %li
               %a(title="Records pending")
                 = year
-          - [2008..2011].each do |year|
+          - (2008..2011).each do |year|
             %li
               %a(href="/maag/#{year}")
                 = year

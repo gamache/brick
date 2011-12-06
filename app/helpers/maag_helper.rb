@@ -1,0 +1,2 @@
+module MaagHelper
+end

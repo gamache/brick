@@ -2,36 +2,48 @@ require 'pp'
 class Stats < Hash
 
   ## Stats.all returns a stats hash encompassing all seasons
+  ## Results are cached (as Hash, to avoid marshaling issues).
   def self.all
-    season_stats = Season.all.map {|s| for_season(s)}
-    fudged_stats = Stats.new.apply_fudges!(Fudge.where(:season => nil).all)
-    stats = season_stats + [fudged_stats]
-    overall_stats = merge_stats(stats)
+    stats_hash = Rails.cache.fetch('stats_overall') do
+      season_stats = Season.all.map {|s| for_season(s)}
+      fudged_stats = Stats.new.apply_fudges!(Fudge.where(:season => nil).all)
+      stats = season_stats + [fudged_stats]
+      overall_stats = merge_stats(stats)
+      Hash[overall_stats]
+    end
+    Stats[stats_hash]
   end
 
+  ## Stats.for_season(season) returns a stats hash for a single season.
+  ## season may be an integer or a Season object.
+  ## Results are cached (as Hash, to avoid marshaling issues).
   def self.for_season(season)
     season = Season.new(:year => season) unless season.is_a?(Season)
 
-    stats = Stats.new
-    scores = Score.where(:season => season.name).all
-    fudges = Fudge.where(:season => season.name).all
+    stats_hash = Rails.cache.fetch("stats#{season.year}") do
+      stats = Stats.new
+      scores = Score.where(:season => season.name).all
+      fudges = Fudge.where(:season => season.name).all
 
-    scores.each do |score|
-      h = stats[score.player_id]
-      h[:warps] += score.warps
-      h[:wimps] += score.wimps
-      h[:games] += 1
-      h[:dates][score.date] += 1
-      h[:wins]            += score.win            ? 1 : 0
-      h[:cfbs]            += score.cfb            ? 1 : 0
-      h[:come_ons]        += score.come_on        ? 1 : 0
-      h[:mystery_factors] += score.mystery_factor ? 1 : 0
+      scores.each do |score|
+        h = stats[score.player_id]
+        h[:warps] += score.warps
+        h[:wimps] += score.wimps
+        h[:games] += 1
+        h[:dates][score.date] += 1
+        h[:wins]            += score.win            ? 1 : 0
+        h[:cfbs]            += score.cfb            ? 1 : 0
+        h[:come_ons]        += score.come_on        ? 1 : 0
+        h[:mystery_factors] += score.mystery_factor ? 1 : 0
+      end
+
+      Hash[stats.
+             apply_fudges!(fudges).
+             calculate!.
+             convert_player_ids_to_names!]
     end
 
-    stats.
-      apply_fudges!(fudges).
-      calculate!.
-      convert_player_ids_to_names!
+    Stats[stats_hash]
   end
 
   def overall; self[:overall] end
