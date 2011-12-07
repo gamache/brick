@@ -30,7 +30,7 @@ class Stats < Hash
         h[:warps] += score.warps
         h[:wimps] += score.wimps
         h[:games] += 1
-        h[:dates][score.date] += 1
+        h[:dates][score.date] += score.warps
         h[:wins]            += score.win            ? 1 : 0
         h[:cfbs]            += score.cfb            ? 1 : 0
         h[:come_ons]        += score.come_on        ? 1 : 0
@@ -57,17 +57,23 @@ class Stats < Hash
       h[k] = Hash[:warps => 0,
                   :games => 0,
                   :nights => 0,
-
-                  ## :dates holds the number of player-games per date
-                  ## and :nights gets computed from it
-                  :dates => Hash.new(0),
-
+                  :nights_won => 0,
+                  :high_night => 0,
                   :wins => 0,
                   :cfbs => 0,
                   :come_ons => 0,
                   :wimps => 0,
                   :mystery_factors => 0,
-                  :gold_stars => 0]
+                  :gold_stars => 0,
+
+                  ## :dates holds the number of warps per date
+                  ## and :nights gets computed from it
+                  :dates => Hash.new(0),
+
+                  ## :winner holds info about what this player won.
+                  ## keyed by stat, value is true or false
+                  :winner => Hash.new(false)
+      ]
     end
   end
 
@@ -81,13 +87,13 @@ class Stats < Hash
     merged_stats = Stats.new
     stats_list.each do |stats|
       stats.each do |player_id, stat_hash|
-        [:warps, :games, :nights, :wins, :cfbs, 
+        [:warps, :games, :nights, :wins, :cfbs,
          :come_ons, :wimps, :mystery_factors, :gold_stars].each do |k|
           merged_stats[player_id][k] += stat_hash[k]
         end
 
-        stat_hash[:dates].each do |date,games|
-          merged_stats[player_id][:dates][date] += games
+        stat_hash[:dates].each do |date,warps|
+          merged_stats[player_id][:dates][date] += warps
         end
 
         ## the :nights field gets destroyed during calculate,
@@ -128,19 +134,15 @@ class Stats < Hash
   ## Non-integer computed stats are also returned as strings.
   def calculate!
     ov = self[:overall]
+    ov[:high_night] = {}
+    ov[:winners] = {}
 
     self.each do |player_id, st|
       next if player_id == :overall
 
-      ## accumulate overall stats
-      [:warps, :wins, :cfbs, :come_ons,
-       :wimps, :mystery_factors, :gold_stars]. each do |field|
-        ov[field] += st[field]
-      end
-      st[:dates].each {|date,games| ov[:dates][date] += games}
-
       ## calculate computed stats for player
       st[:nights] += st[:dates].keys.length # if st[:nights] == 0
+      st[:high_night] = st[:dates].values.max
       st[:gold_stars] = 1 if st[:nights] == 29
       st[:warps_per_game]  = 1.0 * st[:warps] / st[:games]  rescue 0
       st[:warps_per_night] = 1.0 * st[:warps] / st[:nights] rescue 0
@@ -156,21 +158,61 @@ class Stats < Hash
        :wins_per_game].each do |f|
         st["#{f}_str".to_sym] = sprintf "%.3f", st[f]
       end
-      # [:wins_per_night, :wins_per_game].each do |f|
-      #   st["#{f}_str".to_sym] = sprintf "%.2f%%", st[f]*100
-      # end
+
+      ## accumulate overall stats
+      [:warps, :wins, :cfbs, :come_ons,
+       :wimps, :mystery_factors, :gold_stars]. each do |field|
+        ov[field] += st[field]
+      end
+      # nights won calculation
+      st[:dates].each do |date,warps|
+        ov[:dates][date] += warps
+        hnd = ov[:high_night][date] ||= {:players => [], :warps => 0}
+        if hnd[:warps] < warps
+          hnd[:players] = [player_id]
+          hnd[:warps] = warps
+        elsif hnd[:warps] == warps
+          hnd[:players].push(player_id)
+        end
+      end
     end
 
     ## update overall computed stats
     st = self[:overall]
-    st[:games] = st[:wins]
-    st[:nights] = st[:dates].keys.length
-    st[:nights] = 29 if st[:nights] == 0 ## provide sane default
-    st[:warps_per_game]  = 1.0 * st[:warps] / st[:games]  rescue 0
-    st[:warps_per_night] = 1.0 * st[:warps] / st[:nights] rescue 0
-    st[:games_per_night] = 1.0 * st[:games] / st[:nights] rescue 0
+    ov[:games] = ov[:wins]
+    ov[:nights] = ov[:dates].keys.length
+    ov[:nights] = 29 if ov[:nights] == 0 ## provide sane default
+    ov[:warps_per_game]  = 1.0 * ov[:warps] / ov[:games]  rescue 0
+    ov[:warps_per_night] = 1.0 * ov[:warps] / ov[:nights] rescue 0
+    ov[:games_per_night] = 1.0 * ov[:games] / ov[:nights] rescue 0
     [:warps_per_game, :warps_per_night, :games_per_night].each do |f|
-      st["#{f}_str".to_sym] = sprintf "%.3f", st[f]
+      ov["#{f}_str".to_sym] = sprintf "%.3f", ov[f]
+    end
+    ov[:high_night].each do |date,h|
+      h[:players].each {|p| self[p][:nights_won] += 1}
+    end
+
+    ## determine per-stat winners
+    [:warps, :games, :nights, :wins, :nights_won, :cfbs,
+     :come_ons, :wimps, :warps_per_game, :warps_per_night,
+     :games_per_night, :wins_per_game, :high_night].each do |field|
+      owf = ov[:winners][field] = {:players => [], :value => 0}
+      self.each do |player, st|
+        next if player == :overall
+        if st[field] > owf[:value]
+          owf[:players] = [player]
+          owf[:value] = st[field]
+        elsif st[field] == owf[:value]
+          owf[:players].push(player)
+        end
+      end
+    end
+pp ov[:winners]
+    ## mark per-stat winners
+    ov[:winners].each do |field, win|
+      win[:players].each do |player|
+        self[player][:winner][field] = true
+      end
     end
 
     self
@@ -178,9 +220,14 @@ class Stats < Hash
 
   def convert_player_ids_to_names!
     ids = self.keys.select{|k| k.is_a?(Numeric)}
+    pp player_by_id = ids.inject({}) {|acc,id| acc.merge(id => Player.find(id))}
     ids.each do |id|
-      p = Player.find(id)
-      self[p.name] = self.delete(id)
+      p = player_by_id[id]
+      puts "no player for id #{id}" unless p
+      self[p.name] = self.delete(id) if p
+    end
+    self[:overall][:high_night].each do |date,h|
+      h[:players] = h[:players].map{|id| player_by_id[id]}
     end
     self
   end

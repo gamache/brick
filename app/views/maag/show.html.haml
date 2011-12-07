@@ -23,7 +23,8 @@
   $(document).ready(function(){ $('#maag').tablesorter(); });
 
 %table.maag.tablesorter#maag
-  %thead
+  - ['thead', 'tfoot'].each do |tag|
+    = raw "<#{tag}>"
     %tr
       %th
       %th Player
@@ -40,6 +41,7 @@
       %th Games/ Night
       %th Wins/ Game
       %th High Night
+    = raw "</#{tag}>"
   %tbody
     - @stats_array.each_with_index do |st, idx|
       %tr
@@ -47,31 +49,31 @@
           = idx+1
         %td.player
           = st[:player]
-        %td.warps
+        %td.warps{:class => st[:winner][:warps] && 'winner'}
           = st[:warps]
-        %td.games
+        %td.games{:class => st[:winner][:games] && 'winner'}
           = st[:games]
-        %td.nights
+        %td.nights{:class => st[:winner][:nights] && 'winner'}
           = st[:nights]
-        %td.wins
+        %td.wins{:class => st[:winner][:wins] && 'winner'}
           = st[:wins]
-        %td.nights_won
+        %td.nights_won{:class => st[:winner][:nights_won] && 'winner'}
           = st[:nights_won]
-        %td.cfbs
+        %td.cfbs{:class => st[:winner][:cfbs] && 'winner'}
           = st[:cfbs]
-        %td.come_ons
+        %td.come_ons{:class => st[:winner][:come_ons] && 'winner'}
           = st[:come_ons]
-        %td.wimps
+        %td.wimps{:class => st[:winner][:wimps] && 'winner'}
           = st[:wimps]
-        %td.warps_per_game
+        %td.warps_per_game{:class => st[:winner][:warps_per_game] && 'winner'}
           = st[:warps_per_game_str]
-        %td.warps_per_night
+        %td.warps_per_night{:class => st[:winner][:warps_per_night] && 'winner'}
           = st[:warps_per_night_str]
-        %td.games_per_night
+        %td.games_per_night{:class => st[:winner][:games_per_night] && 'winner'}
           = st[:games_per_night_str]
-        %td.wins_per_game
+        %td.wins_per_game{:class => st[:winner][:wins_per_game] && 'winner'}
           = st[:wins_per_game_str]
-        %td.high_night
+        %td.high_night{:class => st[:winner][:high_night] && 'winner'}
           = st[:high_night]
 
 

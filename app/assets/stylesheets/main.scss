@@ -28,6 +28,11 @@ body {
   padding: 10px;
 }
 
+header,footer {
+  text-align: center;
+  margin: 20px 10px 20px 20px;
+}
+
 // zebra stripe
 thead,tr:nth-child(even) {
   background-color: $body_bgcolor * 0.8;
@@ -45,72 +50,79 @@ a,a:link {
 
 
 
-// PASTA from perl project
+
+//// maag
+.overall-stats {
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+// some PASTA from perl project
 
 
 table.maag {
-	width: 100%; 
+  width: 100%; 
   margin: 10px auto 10px auto;
 }
 table.maag td { padding: 10px; }
 
 
 table.maag .winner {
-	font-weight: bold;
-	background-color: #050;
-	color: #fff;
+  font-weight: bold;
+  background-color: #050;
+  color: #fff;
 }
 table.maag .norecords {
-	text-align: center;
-	font-style: italic;
-	padding: 20px;
+  text-align: center;
+  font-style: italic;
+  padding: 20px;
 }
 table.maag .index {
-	width: 8%;
+  width: 8%;
 }
 table.maag .warps,.games,.nights,.wins,.nights_won,.cfbs,.come_ons,.high_night {
-	width: 8%;
+  width: 8%;
 }
 table.maag .warps_per_game,.warps_per_night,.games_per_night,.wins_per_game {
-	width: 8%;
+  width: 8%;
 }
 table.maag .mystery_factor {
-	width: 18%;
+  width: 18%;
 }
 table.maag td {
-	text-align: right;
+  text-align: right;
 }
 table.maag th {
-	text-align: center;
+  text-align: center;
 }
 table.maag th.player {
-	text-align: left;
+  text-align: left;
 }
 table.maag td {
-	padding-right: 10px;
-	padding-left: 10px;
-	width: 100px;
+  padding-right: 10px;
+  padding-left: 10px;
+  width: 100px;
 }
 
 .maag img.glyph {
-	max-height: 40px;
-	max-width:  80px;
-	border: 0;
-	text-align: center;
-	vertical-align: middle;
+  max-height: 40px;
+  max-width:  80px;
+  border: 0;
+  text-align: center;
+  vertical-align: middle;
 }
 
 
 
-.maag_glyphs .player .glyph 	{ display: inline; }
-.maag_glyphs .player .name 		{	display: none;		}
-.maag_glyphs tbody td.player 	{ text-align: center; }
-.maag_glyphs tbody tr td 			{ height: 44px; }
+.maag_glyphs .player .glyph   { display: inline; }
+.maag_glyphs .player .name    { display: none;    }
+.maag_glyphs tbody td.player  { text-align: center; }
+.maag_glyphs tbody tr td      { height: 44px; }
 
-.maag_names .player .glyph		{	display: none;		}
-.maag_names .player .name			{	display: inline; }
-.maag_names tbody td.player 	{	text-align: left;	}
-.maag_names tbody tr td 			{ height: 22px; }
+.maag_names .player .glyph    { display: none;    }
+.maag_names .player .name     { display: inline; }
+.maag_names tbody td.player   { text-align: left; }
+.maag_names tbody tr td       { height: 22px; }
 
 
 
@@ -137,9 +149,3 @@ h3 { font-size: 145%; }
 h4 { font-size: 118%; }
 h1,h2,h3,h4 { font-weight: bold;}
 
-
-//// maag
-.overall-stats {
-  text-align: center;
-  padding-bottom: 10px;
-}
