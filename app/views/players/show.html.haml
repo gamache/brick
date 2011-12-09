@@ -1,0 +1,49 @@
+#player
+  %h1= @player.display_name
+  .stats
+    .stat.warps
+      .number= @stats[:overall][:warps]
+      .desc warps
+    .stat.seasons
+      .number= @stats.keys.length - 1
+      .desc seasons
+    .stat.games
+      .number= @stats[:overall][:games]
+      .desc games
+    .stat.nights
+      .number= @stats[:overall][:nights]
+      .desc nights
+    .stat.wins
+      .number= @stats[:overall][:wins]
+      .desc wins
+    .stat.nights_won
+      .number= @stats[:overall][:nights_won]
+      .desc nights won
+    .stat.cfbs
+      .number= @stats[:overall][:cfbs]
+      .desc CFBs
+    .stat.come_ons
+      .number= @stats[:overall][:come_ons]
+      .desc comeons
+    .stat.high_night
+      .number= @stats[:overall][:high_night]
+      .desc warp high night
+    .stat.win_pct
+      .number= sprintf "%.1f%%", 100*@stats[:overall][:wins_per_game]
+      .desc win rate
+    .stat.warps_per_game
+      .number= sprintf "%.1f", @stats[:overall][:warps_per_game]
+      .desc warps/game
+    .stat.warps_per_night
+      .number= sprintf "%.1f", @stats[:overall][:warps_per_night]
+      .desc warps/night
+    .stat.games_per_night
+      .number= sprintf "%.1f", @stats[:overall][:games_per_night]
+      .desc games/night
+    .stat.wimps
+      .number= @stats[:overall][:wimps]
+      .desc wimp marks
+
+
+
+  %br(clear='all')

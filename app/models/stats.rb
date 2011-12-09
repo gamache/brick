@@ -1,9 +1,36 @@
 require 'pp'
 class Stats < Hash
 
-  ## Stats.all returns a stats hash encompassing all seasons
+  ## Stats.new returns a Stats object (hash), with sane default values.
+  class << self; alias_method :orig_new, :new end
+  def self.new
+    self.orig_new do |h,k|
+      h[k] = Hash[:warps => 0,
+                  :games => 0,
+                  :nights => 0,
+                  :nights_won => 0,
+                  :high_night => 0,
+                  :wins => 0,
+                  :cfbs => 0,
+                  :come_ons => 0,
+                  :wimps => 0,
+                  :mystery_factors => 0,
+                  :gold_stars => 0,
+
+                  ## :dates holds the number of warps per date
+                  ## and :nights gets computed from it
+                  :dates => Hash.new(0),
+
+                  ## :winner holds info about what this player won.
+                  ## keyed by stat, value is true or false
+                  :winner => Hash.new(false)
+      ]
+    end
+  end
+
+  ## Stats.career returns a stats hash encompassing all seasons
   ## Results are cached (as Hash, to avoid marshaling issues).
-  def self.all
+  def self.career
     stats_hash = Rails.cache.fetch('stats_overall') do
       season_stats = Season.all.map {|s| for_season(s)}
       fudged_stats = Stats.new.apply_fudges!(Fudge.where(:season => nil).all)
@@ -12,6 +39,14 @@ class Stats < Hash
       Hash[overall_stats]
     end
     Stats[stats_hash]
+  end
+
+  ## Stats.all returns a hash of Stats records, one :career as above and
+  ## the rest keyed by season year.
+  def self.all
+    Season.all.
+      inject({}) {|h,s| h.merge(s.year => for_season(s))}.
+      merge(:overall => career)
   end
 
   ## Stats.for_season(season) returns a stats hash for a single season.
@@ -50,35 +85,7 @@ class Stats < Hash
 
 
 
-  ## Stats.new returns a Stats object (hash), with sane default values.
-  class << self; alias_method :orig_new, :new; end
-  def self.new
-    self.orig_new do |h,k|
-      h[k] = Hash[:warps => 0,
-                  :games => 0,
-                  :nights => 0,
-                  :nights_won => 0,
-                  :high_night => 0,
-                  :wins => 0,
-                  :cfbs => 0,
-                  :come_ons => 0,
-                  :wimps => 0,
-                  :mystery_factors => 0,
-                  :gold_stars => 0,
-
-                  ## :dates holds the number of warps per date
-                  ## and :nights gets computed from it
-                  :dates => Hash.new(0),
-
-                  ## :winner holds info about what this player won.
-                  ## keyed by stat, value is true or false
-                  :winner => Hash.new(false)
-      ]
-    end
-  end
-
-  ## merge_stats merges multiple Stats objects.  calculate! should be 
-  ## run on the resulting Stats object.
+  ## merge_stats merges multiple Stats objects.
   def self.merge_stats(*stats_list)
     ## make splat notation optional
     stats_list = stats_list.first if stats_list.first.is_a?(Array)
@@ -96,9 +103,9 @@ class Stats < Hash
           merged_stats[player_id][:dates][date] += warps
         end
 
-        ## the :nights field gets destroyed during calculate,
-        ## so we store it as :nights_real so we can reinstate it
-        merged_stats[player_id][:nights_real] = 
+        ## the :nights field gets destroyed during calculate.
+        ## we store it as :nights_real so we can reinstate it
+        merged_stats[player_id][:nights_real] =
           merged_stats[player_id][:nights]
       end
     end
@@ -107,7 +114,7 @@ class Stats < Hash
 
     ## now restore the real night counts
     merged_stats.each do |player, stat_hash|
-      next if player == :overall
+      #next if player == :overall
       stat_hash[:nights] = stat_hash.delete(:nights_real)
     end
 
@@ -125,13 +132,14 @@ class Stats < Hash
        :wimps, :mystery_factors, :gold_stars].each do |field|
         self[player_id][field] += f.send(field).to_i
        end
+      self[player_id][:high_night] = f.high_night if
+        self[player_id][:high_night] < f.high_night
     end
 
     self
   end
 
   ## calculate! computes per-player and overall computed stats.
-  ## Non-integer computed stats are also returned as strings.
   def calculate!
     ov = self[:overall]
     ov[:high_night] = {}
@@ -149,15 +157,6 @@ class Stats < Hash
       st[:games_per_night] = 1.0 * st[:games] / st[:nights] rescue 0
       st[:wins_per_night]  = 1.0 * st[:wins]  / st[:nights] rescue 0
       st[:wins_per_game]   = 1.0 * st[:wins]  / st[:games]  rescue 0
-
-      ## format non-integer stats
-      [:warps_per_game,
-       :warps_per_night,
-       :games_per_night,
-       :wins_per_night,
-       :wins_per_game].each do |f|
-        st["#{f}_str".to_sym] = sprintf "%.3f", st[f]
-      end
 
       ## accumulate overall stats
       [:warps, :wins, :cfbs, :come_ons,
@@ -182,24 +181,29 @@ class Stats < Hash
     ov[:games] = ov[:wins]
     ov[:nights] = ov[:dates].keys.length
     ov[:nights] = 29 if ov[:nights] == 0 ## provide sane default
+    ov[:nights] = ov[:nights_real] if ov[:nights_real]
     ov[:warps_per_game]  = 1.0 * ov[:warps] / ov[:games]  rescue 0
     ov[:warps_per_night] = 1.0 * ov[:warps] / ov[:nights] rescue 0
     ov[:games_per_night] = 1.0 * ov[:games] / ov[:nights] rescue 0
-    [:warps_per_game, :warps_per_night, :games_per_night].each do |f|
-      ov["#{f}_str".to_sym] = sprintf "%.3f", ov[f]
-    end
     ov[:high_night].each do |date,h|
       h[:players].each {|p| self[p][:nights_won] += 1}
     end
 
     ## determine per-stat winners
+    # fuck everyone but the top 50 OR those with 50+ warps
+    # the 51 below is not a bug
+    sorted_players = self.keys.sort{|a,b| self[b][:warps] <=> self[a][:warps]}
+    fifty_plus = self.keys.select{|p| self[p][:warps] >= 50}
+    eligible = (sorted_players[0..51] | fifty_plus).
+                  inject(Hash.new(false)) {|acc,p| acc.merge(p => true)}
     [:warps, :games, :nights, :wins, :nights_won, :cfbs,
      :come_ons, :wimps, :warps_per_game, :warps_per_night,
      :games_per_night, :wins_per_game, :high_night].each do |field|
       owf = ov[:winners][field] = {:players => [], :value => 0}
       self.each do |player, st|
         next if player == :overall
-        if st[field] > owf[:value]
+        next unless eligible[player]
+        if st[field].to_f > owf[:value]
           owf[:players] = [player]
           owf[:value] = st[field]
         elsif st[field] == owf[:value]
@@ -207,7 +211,7 @@ class Stats < Hash
         end
       end
     end
-pp ov[:winners]
+
     ## mark per-stat winners
     ov[:winners].each do |field, win|
       win[:players].each do |player|
@@ -220,7 +224,7 @@ pp ov[:winners]
 
   def convert_player_ids_to_names!
     ids = self.keys.select{|k| k.is_a?(Numeric)}
-    pp player_by_id = ids.inject({}) {|acc,id| acc.merge(id => Player.find(id))}
+    player_by_id = ids.inject({}) {|acc,id| acc.merge(id => Player.find(id))}
     ids.each do |id|
       p = player_by_id[id]
       puts "no player for id #{id}" unless p
@@ -238,7 +242,7 @@ pp ov[:winners]
     a.push({:player => nil, :overall => true}.merge(self[:overall]))
     (self.keys - [:overall]).
       sort {|x,y| self[y][:warps] <=> self[x][:warps]}.
-      each {|k| a.push({:player => k}.merge(self[k]))}
+      each_with_index {|k| a.push({:player => k}.merge(self[k]))}
     a
   end
 

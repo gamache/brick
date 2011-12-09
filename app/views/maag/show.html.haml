@@ -12,17 +12,30 @@
   = overall_stats[:nights]
   nights.
   %br/
-  = overall_stats[:warps_per_game_str]
+  = sprintf "%.1f", overall_stats[:warps_per_game]
   warps per game -
-  = overall_stats[:warps_per_night_str]
-  warps per night - 
-  = overall_stats[:games_per_night_str]
+  = sprintf "%.1f", overall_stats[:warps_per_night]
+  warps per night -
+  = sprintf "%.1f", overall_stats[:games_per_night]
   games per night
 
-%script
-  $(document).ready(function(){ $('#maag').tablesorter(); });
+:javascript
+  $(document).ready(function(){
+    var da =  {asSorting: ['desc','asc']};
+    $('#maag').dataTable({
+      aoColumns: [null, null, da, da, da, da, da,
+                  da, da, da, da, da, da, da, da ],
+      bPaginate: false,
+      bLengthChange: false,
+      bFilter: false,
+      bSort: true,
+      bInfo: false,
+      bAutoWidth: false
+    });
+  });
 
-%table.maag.tablesorter#maag
+
+%table.maag#maag
   - ['thead', 'tfoot'].each do |tag|
     = raw "<#{tag}>"
     %tr
@@ -39,7 +52,7 @@
       %th Warps/ Game
       %th Warps/ Night
       %th Games/ Night
-      %th Wins/ Game
+      %th Win Pct
       %th High Night
     = raw "</#{tag}>"
   %tbody
@@ -66,13 +79,13 @@
         %td.wimps{:class => st[:winner][:wimps] && 'winner'}
           = st[:wimps]
         %td.warps_per_game{:class => st[:winner][:warps_per_game] && 'winner'}
-          = st[:warps_per_game_str]
+          = sprintf "%.2f", st[:warps_per_game]
         %td.warps_per_night{:class => st[:winner][:warps_per_night] && 'winner'}
-          = st[:warps_per_night_str]
+          = sprintf "%.1f", st[:warps_per_night]
         %td.games_per_night{:class => st[:winner][:games_per_night] && 'winner'}
-          = st[:games_per_night_str]
+          = sprintf "%.2f", st[:games_per_night]
         %td.wins_per_game{:class => st[:winner][:wins_per_game] && 'winner'}
-          = st[:wins_per_game_str]
+          = sprintf "%.1f%%", 100*st[:wins_per_game]
         %td.high_night{:class => st[:winner][:high_night] && 'winner'}
           = st[:high_night]
 

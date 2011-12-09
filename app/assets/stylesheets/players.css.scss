@@ -1,3 +1,38 @@
 // Place all the styles related to the players controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+#player {
+  //* {border: 1px solid red; }
+  .stats {
+    display: inline-block;
+    width: 450px;
+    float: left;
+    .stat {
+      display: inline-block;
+      width: 430px;
+      margin: 10px;
+      font-size: 145%;
+      .number {
+        display: inline-block;
+        font-size: 145%;
+      }
+      .desc {
+        display: inline-block;
+      }
+    }
+    .stat.warps, .stat.games, .stat.nights, .stat.wins, .stat.seasons,
+    .stat.nights_won, .stat.cfbs, .stat.come_ons {
+      width: 200px;
+      .xnumber {
+        width: 90px;
+        text-align: right;
+      }
+    }
+
+    .stat.warps_per_game, .stat.warps_per_night, .stat.games_per_night,
+    .stat.win_pct, .stat.wimps, .stat.high_night {
+      width: 200px;
+    }
+  }
+}

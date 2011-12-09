@@ -23,7 +23,7 @@
                 = year
           - (2005..2007).each do |year|
             %li
-              %a(title="Records pending")
+              %a(title="Records pending" class="strike")
                 = year
           - (2008..2011).each do |year|
             %li
@@ -32,9 +32,10 @@
     .content
       = yield
     %footer
-      %p 
+      %p
         copyright 2009-2011 triode
         |
         %a(href="mailto:triode@ftso.net") triode@ftso.net
         |
         all rights reversed
+

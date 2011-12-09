@@ -35,6 +35,7 @@ class Season
           :nights_won => nights_won,
           :cfbs => cfbs,
           :come_ons => come_ons,
+          :high_night => high_night,
           :notes => "Imported from season #{self.name} MAAG"
         )
         fudge.save!

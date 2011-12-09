@@ -16,6 +16,7 @@ class CreateFudges < ActiveRecord::Migration
       t.integer :mystery_factors
       t.integer :gold_stars
       t.integer :nights_won
+      t.integer :high_night
 
       t.timestamps
     end

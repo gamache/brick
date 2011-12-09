@@ -9,4 +9,12 @@ class Player < ActiveRecord::Base
     p.save!
     p
   end
+
+  ## Returns a hash of stats keyed by :career or season year.
+  def stats
+    Stats.all.inject({}) do |acc_hash, keyval|
+      key, val = keyval
+      acc_hash.merge(key => val[self.name])
+    end
+  end
 end

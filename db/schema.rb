@@ -27,6 +27,7 @@ ActiveRecord::Schema.define(:version => 20111201170320) do
     t.integer  "mystery_factors"
     t.integer  "gold_stars"
     t.integer  "nights_won"
+    t.integer  "high_night"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
