@@ -24,7 +24,7 @@
     var da =  {asSorting: ['desc','asc']};
     $('#maag').dataTable({
       aoColumns: [null, null, da, da, da, da, da,
-                  da, da, da, da, da, da, da, da ],
+                  da, da, da, da, da, da, da, da],
       bPaginate: false,
       bLengthChange: false,
       bFilter: false,
@@ -85,6 +85,7 @@
         %td.games_per_night{:class => st[:winner][:games_per_night] && 'winner'}
           = sprintf "%.2f", st[:games_per_night]
         %td.wins_per_game{:class => st[:winner][:wins_per_game] && 'winner'}
+          %div(style='display: none')= st[:wins_per_game]
           = sprintf "%.1f%%", 100*st[:wins_per_game]
         %td.high_night{:class => st[:winner][:high_night] && 'winner'}
           = st[:high_night]

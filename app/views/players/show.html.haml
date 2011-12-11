@@ -44,6 +44,15 @@
       .number= @stats[:overall][:wimps]
       .desc wimp marks
 
+  #warps-chart
+  #warps-per-game-chart
 
 
   %br(clear='all')
+
+  %script
+    $(document).ready(function(){
+    Brick.Player.render_graphs(
+    = raw @stats.to_a.to_json
+    );
+    });

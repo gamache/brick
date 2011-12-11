@@ -31,6 +31,8 @@ GEM
     activesupport (3.1.0)
       multi_json (~> 1.0)
     ansi (1.4.1)
+    ar_fixtures (0.0.4)
+      hoe (>= 1.2.1)
     arel (2.2.1)
     bcrypt-ruby (3.0.1)
     builder (3.0.0)
@@ -48,6 +50,8 @@ GEM
       activesupport
     haml (3.1.4)
     hike (1.2.1)
+    hoe (2.12.4)
+      rake (~> 0.8)
     i18n (0.6.0)
     jquery-rails (1.0.19)
       railties (~> 3.0)
@@ -118,6 +122,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  ar_fixtures
   coffee-rails (~> 3.1.0)
   factory_girl
   haml

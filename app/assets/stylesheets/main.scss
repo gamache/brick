@@ -65,6 +65,12 @@ table.maag {
   tbody tr:nth-child(50) td {
     border-top: 1px solid #444;
   }
+  thead th {
+    border-bottom: 2px double black;
+  }
+  tfoot th {
+    border-top: 2px double black;
+  }
 
   width: 100%;
   margin: 10px auto 10px auto;

@@ -21,3 +21,4 @@ group :test do
 end
 
 gem 'minitest'
+gem 'ar_fixtures'
