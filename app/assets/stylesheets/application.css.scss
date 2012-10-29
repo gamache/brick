@@ -1,3 +1,11 @@
+/*
+ * This is a manifest file that'll automatically include all the stylesheets available in this directory
+ * and any sub-directories. You're free to add application-wide styles to this file and they'll appear at
+ * the top of the compiled file, but it's generally better to create a new file per style scope.
+ *= require_self
+ *= require_tree .
+*/
+
 $width: 960px;
 $html_bgcolor: #020;
 $body_bgcolor: #dfe;
@@ -46,13 +54,46 @@ a,a:link {
 table {border-collapse: collapse;}
 
 
+
+///// nav
+nav { text-align: center; }
+nav ul {
+  list-style-type: none;
+  display: inline-block;
+  margin: 5px auto 5px auto;
+  padding: 0;
+  li {
+    display: inline-block;
+    a {
+      padding: 0 5px 0 5px;
+    }
+  }
+}
+
+
+//// headers
+h1 { font-size: 218%; text-align: center;}
+h2 { font-size: 164%; }
+h3 { font-size: 145%; }
+h4 { font-size: 118%; }
+h1,h2,h3,h4 { font-weight: bold;}
+
+
 //// maag
+
 .overall-stats {
   text-align: center;
   padding-bottom: 10px;
 }
 
 table.maag {
+  // A message with this class appears when viewing a MAAG with no data.
+  .dataTables_empty {
+    text-align: center;
+    font-style: italic;
+    padding: 50px 0px;
+  }
+
   // zebra stripe
   thead,tfoot,tr:nth-child(even) {
     background-color: $body_bgcolor * 0.8;
@@ -140,30 +181,6 @@ table.maag {
 } // table.maag
 
 
-///// nav
-nav { text-align: center; }
-nav ul {
-  list-style-type: none;
-  display: inline-block;
-  margin: 5px auto 5px auto;
-  padding: 0;
-  li {
-    display: inline-block;
-    a {
-      padding: 0 5px 0 5px;
-    }
-  }
-}
-
-
-//// headers
-h1 { font-size: 218%; text-align: center;}
-h2 { font-size: 164%; }
-h3 { font-size: 145%; }
-h4 { font-size: 118%; }
-h1,h2,h3,h4 { font-weight: bold;}
-
-
 //// locale
 
 #locale {
@@ -204,5 +221,4 @@ h1,h2,h3,h4 { font-weight: bold;}
     width: 450px;
   }
 }
-
 

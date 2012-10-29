@@ -19,22 +19,6 @@
   = sprintf "%.1f", overall_stats[:games_per_night]
   games per night
 
-:javascript
-  $(document).ready(function(){
-    var da =  {asSorting: ['desc','asc']};
-    $('#maag').dataTable({
-      aoColumns: [null, null, da, da, da, da, da,
-                  da, da, da, da, da, da, da, da],
-      bPaginate: false,
-      bLengthChange: false,
-      bFilter: false,
-      bSort: true,
-      bInfo: false,
-      bAutoWidth: false
-    });
-  });
-
-
 %table.maag#maag
   - ['thead', 'tfoot'].each do |tag|
     = raw "<#{tag}>"
@@ -90,5 +74,18 @@
         %td.high_night{:class => st[:winner][:high_night] && 'winner'}
           = st[:high_night]
 
-
+:javascript
+  $(document).ready(function(){
+    var da =  {asSorting: ['desc','asc']};
+    $('#maag').dataTable({
+      aoColumns: [null, null, da, da, da, da, da,
+                  da, da, da, da, da, da, da, da],
+      bPaginate: false,
+      bLengthChange: false,
+      bFilter: false,
+      bSort: true,
+      bInfo: false,
+      bAutoWidth: false
+    });
+  });
 
