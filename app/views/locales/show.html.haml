@@ -8,7 +8,7 @@
     =@current_locale.phone
   %p.time
     last updated at
-    =@current_locale ?  @current_locale.updated_at.in_time_zone('America/New_York') : 'never'
+    =@current_locale.updated_at ? @current_locale.updated_at.in_time_zone('America/New_York') : 'never'
 
 #locale-flash
   -if flash[:notice]
