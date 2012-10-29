@@ -163,3 +163,46 @@ h3 { font-size: 145%; }
 h4 { font-size: 118%; }
 h1,h2,h3,h4 { font-weight: bold;}
 
+
+//// locale
+
+#locale {
+  width: 600px;
+  margin: 100px auto 30px auto;
+  border: 1px solid black;
+  padding: 10px;
+  text-align: center;
+  font-size: 118%;
+
+  .place {
+    font-weight: bold;
+  }
+  .time  {
+    font-size: 85%;
+    font-style: italic;
+  }
+}
+
+#locale-flash {
+  height: 40px;
+  padding: 10px;
+  text-align: center;
+  font-style: italic;
+  font-weight: bold;
+  .error { color: red; }
+}
+
+#locale-form {
+  width: 600px;
+  margin: 30px auto 100px auto;
+  label {
+    display: inline-block;
+    width: 100px;
+    font-weight: bold;
+  }
+  input[type=text] {
+    width: 450px;
+  }
+}
+
+

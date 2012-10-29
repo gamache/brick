@@ -4,5 +4,7 @@ Brick::Application.routes.draw do
 
   resources :players, :only => [:show]
 
+  resource :locale, :only => [:show, :create]
+
   root :to => 'maag#show'
 end
