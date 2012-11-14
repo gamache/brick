@@ -133,7 +133,7 @@ class Stats < Hash
         self[player_id][field] += f.send(field).to_i
        end
       self[player_id][:high_night] = f.high_night if
-        self[player_id][:high_night] < f.high_night
+        self[player_id][:high_night].to_i < f.high_night.to_i
     end
 
     self
