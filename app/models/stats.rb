@@ -1,6 +1,89 @@
 require 'pp'
 class Stats < Hash
 
+  ## A Stats object contains the digested statistics for all November
+  ## Games records.
+  #
+  ## It's a plain hash that looks like this at the top level:
+  #
+  # { :overall => <overall stats>,
+  #   :season => {
+  #     :career => <season stats>,
+  #     '1999'  => <season stats>,
+  #     '2000'  => <season stats>,
+  #     ...
+  #   },
+  #   :player => {
+  #     'player1' => <player stats>,
+  #     'player2' => <player stats>,
+  #     ...
+  #   },
+  #   :night => {
+  #     '1999' => {
+  #       '1' => {
+  #         'player1' => <player stats>,
+  #         'player2' => <player stats>,
+  #         ...
+  #       },
+  #       '2' => ...,     and so on for all nights
+  #     },
+  #     '2000' => ...,  and so on for all seasons
+  #   }
+  # }
+  #
+  ## The overall stats data structure follows:
+  #
+  # {
+  #   <stat> => [
+  #     { :player => <player record>, :value => 22 },
+  #     { :player => <player record>, :value => 21 },
+  #     ...
+  #   ],
+  #   <stat> => ...
+  # }
+  #
+  ## ... where <stat> is each of STATS.
+
+  STATS = [:warps, :games, :games_won, :nights, :nights_won, :high_night,
+           :cfbs, :come_ons, :wimp_marks, :mystery_factors, :gold_stars]
+
+  def initialize
+    self.merge!({
+      :overall => make_stats_hash,
+      :season => {},
+      :player => {}
+    })
+  end
+
+  ## Computes total statistics based on the given Scores and Fudges, or
+  ## all Scores and Fudges if not specified.
+  def compute!(set={})
+    scores = set[:scores] || Score.all
+    fudges = set[:fudges] || Fudge.all
+
+    self.ingest_scores!(scores)
+    self.ingest_fudges!(fudges)
+
+  end
+
+private
+
+  def make_stats_hash
+    STATS.inject({}){|stat,acc| acc.merge(stat => [])}
+  end
+
+
+  ## Adds non-computed information about each Score to the stats.
+  def ingest_scores!(scores)
+    scores.each do |score|
+      self[:night][score.season]
+    end
+  end
+end
+
+__END__
+
+
   ## Stats.new returns a Stats object (hash), with sane default values.
   class << self; alias_method :orig_new, :new end
   def self.new
