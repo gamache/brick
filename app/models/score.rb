@@ -6,7 +6,7 @@ class Score < ActiveRecord::Base
 
   ## These methods are here so that Scores can be ingested into
   ## Stats more easily.  They represent increments to a total count.
-  def wins
+  def games_won
     self.win ? 1 : 0
   end
   def cfbs

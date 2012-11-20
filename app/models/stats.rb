@@ -6,79 +6,117 @@ class Stats < Hash
   #
   ## It's a plain hash that looks like this at the top level:
   #
-  # { :overall => <overall stats>,
-  #   :season => {
-  #     :career => <season stats>,
-  #     '1999'  => <season stats>,
-  #     '2000'  => <season stats>,
+  # { :season => {
+  #     :career => <stats hash>,
+  #     '1999'  => <stats hash>,
+  #     '2000'  => <stats hash>,
   #     ...
   #   },
   #   :player => {
-  #     'player1' => <player stats>,
-  #     'player2' => <player stats>,
+  #     'player1' => {
+  #       :career => <stats hash>,
+  #       '1999'  => <stats hash>,
+  #       '2000'  => <stats hash>,
+  #       ...
+  #     }
+  #     'player2' => { ... },
   #     ...
   #   },
   #   :night => {
   #     '1999' => {
   #       '1' => {
-  #         'player1' => <player stats>,
-  #         'player2' => <player stats>,
+  #         'player1' => <stats hash>,
+  #         'player2' => <stats hash>,
   #         ...
   #       },
   #       '2' => ...,     and so on for all nights
   #     },
-  #     '2000' => ...,  and so on for all seasons
+  #     '2000' => ...,  and so on for all seasons with such data
   #   }
   # }
   #
-  ## The overall stats data structure follows:
+  ## Five types of statistic are being kept:
   #
-  # {
-  #   <stat> => [
-  #     { :player => <player record>, :value => 22 },
-  #     { :player => <player record>, :value => 21 },
-  #     ...
-  #   ],
-  #   <stat> => ...
-  # }
-  #
-  ## ... where <stat> is each of STATS.
+  # stats[:season][:career] is the overall tally for all games.
+  # stats[:season]['1999'] is the overall tally for the 1999 season.
+  # stats[:player]['triode'][:career] is triode's career stats.
+  # stats[:player]['triode']['1999'] is triode's 1999 stats.
+  # stats[:night]['2012']['1']['triode'] is triode's stats for opening
+  #   night of the 2012 season.
 
-  STATS = [:warps, :games, :games_won, :nights, :nights_won, :high_night,
-           :cfbs, :come_ons, :wimp_marks, :mystery_factors, :gold_stars]
+  COLLECTED_STATS = [:warps, :games, :games_won, :cfbs, :come_ons,
+                     :wimp_marks, :mystery_factors]
+  COMPUTED_STATS = [:nights, :nights_won, :high_night, :gold_stars]
+  STATS = COLLECTED_STATS + COMPUTED_STATS
 
   def initialize
     self.merge!({
-      :overall => make_stats_hash,
       :season => {},
-      :player => {}
+      :player => {},
+      :night => {}
     })
   end
 
   ## Computes total statistics based on the given Scores and Fudges, or
   ## all Scores and Fudges if not specified.
   def compute!(set={})
-    scores = set[:scores] || Score.all
-    fudges = set[:fudges] || Fudge.all
+    scores = set[:scores] || Score.all(:include => :player)
+    fudges = set[:fudges] || Fudge.all(:include => :player)
 
-    self.ingest_scores!(scores)
-    self.ingest_fudges!(fudges)
+    ingest_scores!(scores)
+    ingest_fudges!(fudges)
 
+    self
   end
 
 private
 
+  ## Returns a new hash of {stat => 0, ...} for all stats.
   def make_stats_hash
-    STATS.inject({}){|stat,acc| acc.merge(stat => [])}
+    STATS.inject({}) {|acc,stat| acc.merge(stat => 0)}
   end
 
 
   ## Adds non-computed information about each Score to the stats.
   def ingest_scores!(scores)
     scores.each do |score|
-      self[:night][score.season]
+      player_name = score.player.name
+
+      ## set up night record
+      night_by_season = self[:night][score.season] ||= {}
+      night_by_player = night_by_season[score.night] ||= {}
+      night = night_by_player[player_name] ||= make_stats_hash
+
+      ## set up season record
+      self[:season][score.season] ||= {}
+      season = self[:season][score.season][player_name] ||= make_stats_hash
+
+      ## set up season career (overall) record
+      self[:season][:career] ||= {}
+      season_career = self[:season][:career][player_name] ||= make_stats_hash
+
+      ## set up player career and player season records
+      p = self[:player][player_name] ||= {}
+      player_season = p[score.season] ||= make_stats_hash
+      player_career = p[:career] ||= make_stats_hash
+
+      ## finally, add the score into all those records
+      COLLECTED_STATS.each do |stat|
+        value = score.send(stat)
+        [night, season, season_career, player_season, player_career].each do |record|
+          record[stat] += value
+        end
+      end
     end
   end
+
+  def ingest_fudges!(fudges)
+    fudges.each do |fudge|
+      player_name = fudge.player.name
+
+    end
+  end
+
 end
 
 __END__
