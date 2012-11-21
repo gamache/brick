@@ -70,6 +70,7 @@ private
     ingest_fudges!(fudges)
 
     compute_stats!
+    expose_failures ## FIXME omg dubious thinking ahead
 
     sort_seasons_by_warps!
     mark_top_winners!
@@ -132,6 +133,15 @@ private
         end
       end
     end
+
+  end
+
+  def expose_failures
+    self[:season].each do |season, stats|
+      stats.each do |player, stats_hash|
+        pp stats_hash unless stats_hash.is_a? Hash
+      end
+    end
   end
 
   ## Adds non-computed information about each Fudge to the stats.
@@ -151,6 +161,7 @@ private
   end
 
   ## Adds computed information to the stats.
+  ## FIXME something is wrong here
   def compute_stats!
     ## calculate nights, nights won, high night, and gold stars by using the
     ## self[:night] structure.
@@ -226,20 +237,30 @@ private
     end
   end
 
+  ## FIXME this part is totally fucked
   def sort_seasons_by_warps!
     self[:season].each do |season, stats|
-      self[:season][season] = Hash[
-        self[:season][season].sort_by {|k,v| -v[:warps]}
-      ]
+      # stats.each {|player, st| pp season unless st.is_a? Hash}
+      self[:season][season] = Hash[ stats.sort_by {|k,v| 
+        -v[:warps] rescue 0
+      }]
     end
   end
 
   ## Mark the winners of each stat in the top N stats (by warps).
   def mark_top_winners!(n=50)
-    self[:season].each do |season, stats|
-      top = stats[0..n]
-      stats.first.keys.each do |stat|
-        stats.sort_by{|k,v| -v[stat]}.first
+    self[:season].each do |season, stats_hashes|
+      ## for each stat, sort the top-N-by-warps on that stat and
+      ## mark the top scores 
+      top = Hash[ stats_hashes.to_a[0..n] ]
+      STATS.each do |stat|
+        score = nil
+        top.sort_by{|k,v| -v[stat]}.each do |player, stats_hash|
+          score ||= stats_hash[stat]
+          break unless score == stats_hash[stat]
+          stats_hash[:top_scores] ||= []
+          stats_hash[:top_scores] << stat
+        end
       end
     end
   end
