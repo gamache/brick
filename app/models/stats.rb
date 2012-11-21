@@ -68,6 +68,14 @@ class Stats < Hash
     compute!(set)
   end
 
+  def maag(year=:career)
+    self[:season][year]
+  end
+
+  def career
+    self[:season][:career]
+  end
+
 private
 
   ## Computes total statistics based on the given Scores and Fudges, or
@@ -130,7 +138,7 @@ private
   end
 
 
-  ## Adds non-computed information about each Score to the stats.
+  ## Add non-computed information about each Score to the stats.
   def ingest_scores!(scores)
     scores.each do |score|
       ## get the stats hashes to which the score must be added
@@ -152,11 +160,12 @@ private
   end
 
 
-  ## Adds non-computed information about each Fudge to the stats.
+  ## Add each Fudge to the stats.
   def ingest_fudges!(fudges)
     fudges.each do |fudge|
       stats_hashes = get_stats_hashes(:name => fudge.player.name,
                                       :season => fudge.season)
+      ## Fudges get all stats, because they often contain computed stats.
       STATS.each do |stat|
         value = fudge.send(stat)
         stats_hashes.each do |stats_hash|
@@ -168,7 +177,7 @@ private
   end
 
 
-  ## Adds computed information to the stats.
+  ## Add computed information to the stats.
   def compute_stats!
     ## calculate nights, nights won, high night, and gold stars by using the
     ## self[:night] structure.
@@ -247,16 +256,7 @@ private
 
   def sort_seasons_by_warps!
     self[:season].each do |season, stats|
-      stats.each {|player, st| 
-        unless st.is_a? Hash
-          pp player
-          pp st
-          pp season
-        end
-      }
-      self[:season][season] = Hash[ stats.sort_by {|k,v|
-        -v[:warps].to_i
-      }]
+      self[:season][season] = Hash[ stats.sort_by {|k,v| -v[:warps].to_i }]
     end
   end
 
@@ -265,7 +265,7 @@ private
   def mark_top_winners!(n=50)
     self[:season].each do |season, stats_hashes|
       ## for each stat, sort the top-N-by-warps on that stat and
-      ## mark the top scores 
+      ## mark the top scores
       top = Hash[ stats_hashes.to_a[0..n] ]
       STATS.each do |stat|
         score = nil
