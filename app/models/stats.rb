@@ -8,40 +8,40 @@ class Stats < Hash
   #
   # { :season => {
   #     :career => <stats hash>,
-  #     '1999'  => <stats hash>,
-  #     '2000'  => <stats hash>,
+  #     1999  => <stats hash>,
+  #     2000  => <stats hash>,
   #     ...
   #   },
   #   :player => {
   #     'player1' => {
   #       :career => <stats hash>,
-  #       '1999'  => <stats hash>,
-  #       '2000'  => <stats hash>,
+  #       1999  => <stats hash>,
+  #       2000  => <stats hash>,
   #       ...
   #     }
   #     'player2' => { ... },
   #     ...
   #   },
   #   :night => {
-  #     '1999' => {
-  #       '1' => {
+  #     1999 => {
+  #       1 => {
   #         'player1' => <stats hash>,
   #         'player2' => <stats hash>,
   #         ...
   #       },
-  #       '2' => ...,     and so on for all nights
+  #       2 => ...,     and so on for all nights
   #     },
-  #     '2000' => ...,  and so on for all seasons with such data
+  #     2000 => ...,  and so on for all seasons with such data
   #   }
   # }
   #
   ## Five types of statistic are being kept:
   #
   # stats[:season][:career] is the overall tally for all games.
-  # stats[:season]['1999'] is the overall tally for the 1999 season.
+  # stats[:season][1999] is the overall tally for the 1999 season.
   # stats[:player]['triode'][:career] is triode's career stats.
-  # stats[:player]['triode']['1999'] is triode's 1999 stats.
-  # stats[:night]['2012']['1']['triode'] is triode's stats for opening
+  # stats[:player]['triode'][1999] is triode's 1999 stats.
+  # stats[:night][2012][1]['triode'] is triode's stats for opening
   #   night of the 2012 season.
 
   COLLECTED_STATS = [:warps, :games, :games_won, :cfbs, :come_ons,
@@ -49,13 +49,16 @@ class Stats < Hash
   COMPUTED_STATS = [:nights, :nights_won, :high_night, :gold_stars]
   STATS = COLLECTED_STATS + COMPUTED_STATS
 
-  def initialize
+  def initialize(set={})
     self.merge!({
       :season => {},
       :player => {},
       :night => {}
     })
+    compute!(set)
   end
+
+private
 
   ## Computes total statistics based on the given Scores and Fudges, or
   ## all Scores and Fudges if not specified.
@@ -66,54 +69,178 @@ class Stats < Hash
     ingest_scores!(scores)
     ingest_fudges!(fudges)
 
+    compute_stats!
+
+    sort_seasons_by_warps!
+    mark_top_winners!
+
     self
   end
 
-private
+  ## For a given player name, season, and night, returns a list of
+  ## stats hashes to which a Score or Fudge should be added.
+  ## Any or all of the player name, season, and night may be nil.
+  def get_stats_hashes(attrs)
+    player_name = attrs[:name]
+    season = attrs[:season]
+    night = attrs[:night]
 
-  ## Returns a new hash of {stat => 0, ...} for all stats.
-  def make_stats_hash
-    STATS.inject({}) {|acc,stat| acc.merge(stat => 0)}
+    stats_hashes = []
+
+    ## set up season career (overall) record
+    self[:season][:career] ||= {}
+    stats_hashes << self[:season][:career][player_name] ||= {}
+
+    ## set up night record
+    if night && player_name
+      night_by_season = self[:night][season] ||= {}
+      night_by_player = night_by_season[night] ||= {}
+      stats_hashes << night_by_player[player_name] ||= {}
+    end
+
+    ## set up season record
+    if season
+      self[:season][season] ||= {}
+      stats_hashes << self[:season][season][player_name] ||= {}
+    end
+
+    ## set up player career and player season records
+    if player_name
+      p = self[:player][player_name] ||= {}
+      stats_hashes << p[season] ||= {} if season
+      stats_hashes << p[:career] ||= {}
+    end
+
+    stats_hashes
   end
-
 
   ## Adds non-computed information about each Score to the stats.
   def ingest_scores!(scores)
     scores.each do |score|
-      player_name = score.player.name
+      ## get the stats hashes to which the score must be added
+      stats_hashes = get_stats_hashes(:name => score.player.name,
+                                      :season => score.season,
+                                      :night => score.night)
 
-      ## set up night record
-      night_by_season = self[:night][score.season] ||= {}
-      night_by_player = night_by_season[score.night] ||= {}
-      night = night_by_player[player_name] ||= make_stats_hash
 
-      ## set up season record
-      self[:season][score.season] ||= {}
-      season = self[:season][score.season][player_name] ||= make_stats_hash
-
-      ## set up season career (overall) record
-      self[:season][:career] ||= {}
-      season_career = self[:season][:career][player_name] ||= make_stats_hash
-
-      ## set up player career and player season records
-      p = self[:player][player_name] ||= {}
-      player_season = p[score.season] ||= make_stats_hash
-      player_career = p[:career] ||= make_stats_hash
-
-      ## finally, add the score into all those records
+      ## and add the score to those records
       COLLECTED_STATS.each do |stat|
         value = score.send(stat)
-        [night, season, season_career, player_season, player_career].each do |record|
-          record[stat] += value
+        stats_hashes.each do |stats_hash|
+          stats_hash[stat] ||= 0
+          stats_hash[stat] += value.to_i
         end
       end
     end
   end
 
+  ## Adds non-computed information about each Fudge to the stats.
   def ingest_fudges!(fudges)
     fudges.each do |fudge|
-      player_name = fudge.player.name
+      stats_hashes = get_stats_hashes(:name => fudge.player.name,
+                                      :season => fudge.season)
+      COLLECTED_STATS.each do |stat|
+        value = fudge.send(stat)
+        stats_hashes.each do |stats_hash|
+          stats_hash[stat] ||= 0
+          stats_hash[stat] += value.to_i
+        end
+      end
 
+    end
+  end
+
+  ## Adds computed information to the stats.
+  def compute_stats!
+    ## calculate nights, nights won, high night, and gold stars by using the
+    ## self[:night] structure.
+    high_night_for_player = Hash.new(0)
+
+    self[:night].keys.each do |season|
+      next if season == :career
+      nights = self[:night][season].keys
+
+      ## used for high night and gold star calculation
+      nnights = nights.count
+      high_night_this_season_for_player = Hash.new(0)
+      nights_for_player = Hash.new(0)
+
+      nights.each do |night|
+        ## increment overall per-season and career total
+        self[:season][:career][:nights] ||= 0
+        self[:season][:career][:nights] += 1
+        self[:season][season][:nights] ||= 0
+        self[:season][season][:nights] += 1
+
+        ## used for nights_won
+        most_warps = 0
+        night_winner = nil
+
+        players = self[:night][season][night].keys
+        players.each do |player|
+          nights_for_player[player] += 1
+
+          ## increment player's per-season and career total
+          self[:player][player][:career][:nights] ||= 0
+          self[:player][player][:career][:nights] += 1
+          self[:player][player][season][:nights] ||= 0
+          n = self[:player][player][season][:nights] += 1
+
+          ## determine gold star status for the season
+          if n == nnights
+            self[:player][player][season][:gold_stars] = 1
+          end
+
+          ## update night winner, for nights_won
+          warps = self[:night][season][night][player][:warps]
+          if warps > most_warps
+            most_warps = warps
+            night_winner = player
+          end
+
+          ## update high night
+          if high_night_for_player[player] < warps
+            high_night_for_player[player] = warps
+          end
+          if high_night_this_season_for_player[player] < warps
+            high_night_this_season_for_player[player] = warps
+          end
+        end
+
+        ## increment nights_won for the night winner
+        self[:player][night_winner][:career][:nights_won] ||= 0
+        self[:player][night_winner][:career][:nights_won] += 1
+        self[:player][night_winner][season][:nights_won] ||= 0
+        self[:player][night_winner][season][:nights_won] += 1
+      end # nights.each
+
+      ## store high night per-season data
+      high_night_this_season_for_player.each do |player, warps|
+        self[:player][player][season][:high_night] = warps
+      end
+    end # seasons.each
+
+    ## store high-night career data
+    high_night_for_player.each do |player, warps|
+      self[:player][player][:career][:high_night] = warps
+    end
+  end
+
+  def sort_seasons_by_warps!
+    self[:season].each do |season, stats|
+      self[:season][season] = Hash[
+        self[:season][season].sort_by {|k,v| -v[:warps]}
+      ]
+    end
+  end
+
+  ## Mark the winners of each stat in the top N stats (by warps).
+  def mark_top_winners!(n=50)
+    self[:season].each do |season, stats|
+      top = stats[0..n]
+      stats.first.keys.each do |stat|
+        stats.sort_by{|k,v| -v[stat]}.first
+      end
     end
   end
 
