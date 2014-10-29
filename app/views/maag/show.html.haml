@@ -45,6 +45,7 @@
         %td.index
           = idx+1
         %td.player
+          //= link_to(st[:player], player_url(st[:player]))
           = st[:player]
         %td.warps{:class => st[:winner][:warps] && 'winner'}
           = st[:warps]
