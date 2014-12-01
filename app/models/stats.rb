@@ -128,7 +128,7 @@ class Stats < Hash
 
     fudges.each do |f|
       player_id = f.player_id || :overall
-      [:warps, :games, :nights, :wins, :cfbs, :come_ons,
+      [:warps, :games, :nights, :wins, :cfbs, :come_ons, :nights_won,
        :wimps, :mystery_factors, :gold_stars].each do |field|
         self[player_id][field] += f.send(field).to_i
        end

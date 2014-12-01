@@ -28,8 +28,8 @@ ActiveRecord::Schema.define(:version => 20121029115333) do
     t.integer  "gold_stars"
     t.integer  "nights_won"
     t.integer  "high_night"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
   end
 
   add_index "fudges", ["player_id"], :name => "index_fudges_on_player_id"
@@ -39,8 +39,8 @@ ActiveRecord::Schema.define(:version => 20121029115333) do
     t.string   "place"
     t.string   "phone"
     t.string   "other"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "players", :force => true do |t|
@@ -48,8 +48,8 @@ ActiveRecord::Schema.define(:version => 20121029115333) do
     t.string   "display_name"
     t.string   "password_salt"
     t.string   "sha512_password"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
   end
 
   add_index "players", ["name"], :name => "index_players_on_name", :unique => true
@@ -65,8 +65,8 @@ ActiveRecord::Schema.define(:version => 20121029115333) do
     t.boolean  "cfb"
     t.boolean  "come_on"
     t.boolean  "mystery_factor"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
   end
 
   add_index "scores", ["player_id"], :name => "index_scores_on_player_id"
