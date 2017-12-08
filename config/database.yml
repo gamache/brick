@@ -19,11 +19,11 @@ test:
   timeout: 5000
 
 production:
-  adapter: mysql2
+  adapter: postgresql
   encoding: utf8
-  database: brick_production
+  database: brick_2014_production
   host: localhost
-  username: root
-  password:
+  username: postgres
+  password: 'tri-flow and girl grease'
   pool: 5
   timeout: 5000

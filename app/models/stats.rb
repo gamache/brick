@@ -12,8 +12,8 @@ class Stats < Hash
                   :high_night => 0,
                   :wins => 0,
                   :cfbs => 0,
-                  :come_ons => 0,
-                  :wimps => 0,
+                  :come_ons => nil,
+                  :wimps => nil,
                   :mystery_factors => 0,
                   :gold_stars => 0,
 
@@ -62,13 +62,18 @@ class Stats < Hash
 
       scores.each do |score|
         h = stats[score.player_id]
-        h[:warps] += score.warps
+
+        ## Wimps and come-ons have not always been recorded
+        h[:wimps] ||= 0
         h[:wimps] += score.wimps
+        h[:come_ons] ||= 0
+        h[:come_ons] += score.come_on ? 1 : 0
+
+        h[:warps] += score.warps
         h[:games] += 1
         h[:dates][score.date] += score.warps
         h[:wins]            += score.win            ? 1 : 0
         h[:cfbs]            += score.cfb            ? 1 : 0
-        h[:come_ons]        += score.come_on        ? 1 : 0
         h[:mystery_factors] += score.mystery_factor ? 1 : 0
       end
 
@@ -95,8 +100,15 @@ class Stats < Hash
     stats_list.each do |stats|
       stats.each do |player_id, stat_hash|
         [:warps, :games, :nights, :wins, :cfbs,
-         :come_ons, :wimps, :mystery_factors, :gold_stars].each do |k|
+         :mystery_factors, :gold_stars].each do |k|
           merged_stats[player_id][k] += stat_hash[k]
+        end
+
+        [:wimps, :come_ons].each do |k|
+          if stat_hash[k]
+            merged_stats[player_id][k] ||= 0
+            merged_stats[player_id][k] += stat_hash[k]
+          end
         end
 
         stat_hash[:dates].each do |date,warps|
@@ -128,10 +140,17 @@ class Stats < Hash
 
     fudges.each do |f|
       player_id = f.player_id || :overall
-      [:warps, :games, :nights, :wins, :cfbs, :come_ons, :nights_won,
-       :wimps, :mystery_factors, :gold_stars].each do |field|
+      [:warps, :games, :nights, :wins, :cfbs, :nights_won,
+       :mystery_factors, :gold_stars].each do |field|
         self[player_id][field] += f.send(field).to_i
-       end
+      end
+      [:wimps, :come_ons].each do |field|
+        if f.send(field)
+          self[player_id][field] ||= 0
+          self[player_id][field] += f.send(field)
+        end
+      end
+
       self[player_id][:high_night] = f.high_night if
         self[player_id][:high_night].to_i < f.high_night.to_i
     end
@@ -159,9 +178,15 @@ class Stats < Hash
       st[:wins_per_game]   = 1.0 * st[:wins]  / st[:games]  rescue 0
 
       ## accumulate overall stats
-      [:warps, :wins, :cfbs, :come_ons,
-       :wimps, :mystery_factors, :gold_stars]. each do |field|
+      [:warps, :wins, :cfbs,
+       :mystery_factors, :gold_stars]. each do |field|
         ov[field] += st[field]
+      end
+      [:wimps, :come_ons].each do |field|
+        if st[field]
+          ov[field] ||= 0
+          ov[field] += st[field]
+        end
       end
       # nights won calculation
       st[:dates].each do |date,warps|
