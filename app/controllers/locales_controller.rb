@@ -13,7 +13,11 @@ class LocalesController < ApplicationController
   def create
     locale_params = params[:locale]
     password = locale_params.delete(:password)
-    @locale = Locale.new(params[:locale])
+    @locale = Locale.new(
+      place: locale_params[:place],
+      phone: locale_params[:phone],
+      other: locale_params[:other],
+    )
 
     if password == '11111'
       @locale.save!

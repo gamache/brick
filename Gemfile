@@ -1,6 +1,7 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
-gem 'rails', '~> 3.2.11'
+gem 'rails', '~> 5.2'
+gem 'responders'
 
 gem 'sqlite3'
 gem 'pg'
@@ -18,7 +19,6 @@ group :test do
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'mocha'
-  gem 'factory_girl'
 end
 
 gem 'minitest'

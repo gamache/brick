@@ -1,4 +1,4 @@
-class CreateFudges < ActiveRecord::Migration
+class CreateFudges < ActiveRecord::Migration[5.2]
   def change
     create_table :fudges do |t|
       t.integer :player_id

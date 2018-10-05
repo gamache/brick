@@ -2,17 +2,13 @@ require 'test_helper'
 
 class StatsTest < ActiveSupport::TestCase
   test 'Stats.for_season(2008)' do
-    s = Season.new(:year => 2008)
+    s = Season.new(:year => "2008")
     s.import_scores_dir('data/scores/2008')
 
     st = Stats.for_season(2008)
     assert st
     assert st.is_a?(Stats)
     assert st.is_a?(Hash)
-
-    if st.keys.length == 1
-      assert false, "You probably need to import the 2008 scores."
-    end
 
     assert st.has_key?(:overall)
     ov = st[:overall]

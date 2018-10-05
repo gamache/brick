@@ -60,7 +60,7 @@ class Stats < Hash
       scores = Score.where(:season => season.name).all
       fudges = Fudge.where(:season => season.name).all
 
-      scores.each do |score|
+      scores.to_a.each do |score|
         h = stats[score.player_id]
 
         ## Wimps and come-ons have not always been recorded
@@ -97,7 +97,7 @@ class Stats < Hash
 
     ## accumulate stats
     merged_stats = Stats.new
-    stats_list.each do |stats|
+    stats_list.to_a.each do |stats|
       stats.each do |player_id, stat_hash|
         [:warps, :games, :nights, :wins, :cfbs,
          :mystery_factors, :gold_stars].each do |k|
@@ -134,11 +134,11 @@ class Stats < Hash
   end
 
   ## apply_fudges! incorporates the given fudge values into stats.
-  def apply_fudges!(*fudges)
+  def apply_fudges!(fudges)
     ## make splat notation optional
-    fudges = fudges.first if fudges.first.is_a?(Array)
+    #fudges = fudges.first if fudges.first.is_a?(Array)
 
-    fudges.each do |f|
+    fudges.to_a.each do |f|
       player_id = f.player_id || :overall
       [:warps, :games, :nights, :wins, :cfbs, :nights_won,
        :mystery_factors, :gold_stars].each do |field|
