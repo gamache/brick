@@ -2,7 +2,7 @@ require 'test_helper'
 
 class StatsTest < ActiveSupport::TestCase
   test 'Stats.for_season(2008)' do
-    s = Season.new(:year => "2008")
+    s = Season.new(:year => 2008)
     s.import_scores_dir('data/scores/2008')
 
     st = Stats.for_season(2008)
@@ -12,8 +12,6 @@ class StatsTest < ActiveSupport::TestCase
 
     assert st.has_key?(:overall)
     ov = st[:overall]
-    assert_equal true, ov[:overall]
-    assert_equal nil,  ov[:player]
     assert_equal 8576, ov[:warps]
     assert_equal 29,   ov[:nights]
     assert_equal 254,  ov[:games]
@@ -25,12 +23,10 @@ class StatsTest < ActiveSupport::TestCase
 
     assert st.has_key?('albatross')
     alb = st['albatross']
-    assert_equal 'albatross', alb[:player]
     assert_equal 654,         alb[:warps]
     assert_equal 167,         alb[:games]
     assert_equal 23,          alb[:nights]
     assert_equal 26,          alb[:wins]
-
   end
 end
 
