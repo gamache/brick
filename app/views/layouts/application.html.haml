@@ -15,26 +15,50 @@
             %a(href="/locale") Locale
           %li
             %a(href="/maag") Career
-          - (1999..2004).each do |year|
-            %li
-              %a(href="/maag/#{year}")
-                = year
-          - (2005..2007).each do |year|
-            %li
-              %a(title="Records pending" class="strike")
-                = year
-          - (2008..2014).each do |year|
-            %li
-              %a(href="/maag/#{year}")
-                = year
           %li
-            %a(href="/maag/2017")
-              2017
+            %a(href="/maag/1999") '99
+          %li
+            %a(href="/maag/2000") '00
+          %li
+            %a(href="/maag/2001") '01
+          %li
+            %a(href="/maag/2002") '02
+          %li
+            %a(href="/maag/2003") '03
+          %li
+            %a(href="/maag/2004") '04
+          %li
+            %a(title="Records pending" class="strike") '05
+          %li
+            %a(title="Records pending" class="strike") '06
+          %li
+            %a(title="Records pending" class="strike") '07
+          %li
+            %a(href="/maag/2008") '08
+          %li
+            %a(href="/maag/2009") '09
+          %li
+            %a(href="/maag/2010") '10
+          %li
+            %a(href="/maag/2011") '11
+          %li
+            %a(href="/maag/2012") '12
+          %li
+            %a(href="/maag/2013") '13
+          %li
+            %a(href="/maag/2014") '14
+          %li
+            %a(title="Records pending" class="strike") '15
+          %li
+            %a(title="Records pending" class="strike") '16
+          %li
+            %a(href="/maag/2017") '17
     .content
       = yield
     %footer
       %p
-        records prior to 1999 are lost.  2005&ndash;2007 records are incomplete and pending entry.
+        records prior to 1999 are lost.
+        2005&ndash;2007 and 2015&ndash;2016 records are incomplete and pending entry.
         %br/
         copyright 2009&ndash;2018 triode
         |

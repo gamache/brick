@@ -4,7 +4,7 @@ gem 'rails', '~> 5.2'
 gem 'responders'
 
 gem 'sqlite3'
-gem 'pg'
+gem 'pg', "~> 0.21"
 
 group :assets do
   gem 'sass-rails'
