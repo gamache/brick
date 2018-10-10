@@ -1,0 +1,6 @@
+four-dots 4 1 4
+nested-triangles 4 0 10!
+banana 9! 0 4
+simoleon 4 3 0
+c-dot 4 9! 4
+koh 4

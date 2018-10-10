@@ -1,0 +1,8 @@
+dead-smiley 7! 7! 5ww 2
+woodchuck 2 4 3 7!
+four-dots 4 3 4 3
+watchtower 2 1 2 4
+inverted-checkmark 1 3 2
+eye-of-horus 1 2 1
+new-giraffe 3 2 1 1
+set-of-all-strings 1 1 8! 3

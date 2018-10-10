@@ -1,0 +1,11 @@
+four-dots 4 1 4 9!
+watchtower 4 3w 4 4
+simoleon 4 1 4 4
+c-dot 3 3 4 2
+apple-k 4 2 4
+snake 8!
+nautilus 5 1 4 5
+triple-integral 7!
+maybe-tensor 1 4
+phi 1
+union-jack 8! 4

@@ -1,0 +1,26 @@
+paintbrush 4 3 
+four-dots 2 2 4
+watchtower 3
+set-of-all-strings 2
+banana 2
+nerd-fish 13cfb! 1
+t-rex 0
+APEK 3
+simoleon 1 2 3
+triple-integral 2
+phi 2
+union-jack 3 1 4
+duck 1 3
+hamburger-helper 5w 2
+omega-infinity 5 2 9w!
+triangle-vertices 3
+jake-the-snake 1
+acute-angle 5on 3
+interlocking-circles 1
+hexbolt-two-lines 4
+cowbell 3
+farmer-with-pitchfork 2 7!
+sugar-bubbles 2 2
+tetrahedron 4 3
+cloud-nine 1 1
+psi-cat 2

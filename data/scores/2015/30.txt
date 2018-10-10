@@ -1,0 +1,10 @@
+paintbrush 4 8! 8! 5 5 8! 5
+four-dots 4 13cfb! 4 3 4 3 4 2 3
+watchtower 5 6on 4 4w 4 4w 4 4
+inverted-checkmark 1 4 3 9!
+banana 9! 4 4 4 8! 4 4 4
+alpaca 7! 4 4 9! 4
+hamburger-helper 4 4
+sugar-bubbles 3
+triode 4 4 3
+math 5 5 4

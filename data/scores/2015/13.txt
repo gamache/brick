@@ -1,0 +1,7 @@
+paintbrush 4
+four-dots 4 10cfb!
+watchtower 2 4
+three-petal-flower 9!
+stadium 3 4
+banana 1 3
+alpaca 4w 5on
