@@ -1,0 +1,11 @@
+four-dots 4 3 11cfb! 4 4 4 4
+tetrahedron 1 4 1 7! 5on
+simoleon 4 4 3
+duck 3 7! 5on 4 3 1w
+sports-scene 8! 1 4 2
+hamburger-helper 3 3 5 4
+street-lamp 3 2
+cherry 4 1 4 3
+airplane-rat 4 3 3 10cfb!
+spongebob 0 8! 7! 4 3
+grinning-shit-emoji 0
