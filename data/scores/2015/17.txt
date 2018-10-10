@@ -1,0 +1,8 @@
+woodchuck 8! 7!
+four-dots 2 2
+watchtower 2 5w
+inverted-checkmark 2 3
+eye-of-horus 2
+set-of-all-strings 4w
+alpaca 4 4
+circle-diamond 3
