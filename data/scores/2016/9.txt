@@ -1,0 +1,10 @@
+four-dots 4 3 4 1 2 1 1 4 4
+tetrahedron 9! 7! 7! 0 2 8! 7! 5on 3
+banana 4 2 1 4 7! 3 4 10cfb! 10cfb!
+duck 3 7! 4 0
+sports-scene 1
+street-lamp 4 2 3 1
+t-rex 4 4 2 3 5on
+moon-in-circle 1 2 3 1 1
+delta-dong 0 4 4 4 1
+water-shaking-ferret 0

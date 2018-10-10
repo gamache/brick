@@ -1,0 +1,6 @@
+four-dots 2 3
+tetrahedron 1 3
+paintbrush 8! 7!
+sports-scene 2
+street-lamp 1 4
+dick-pix 2

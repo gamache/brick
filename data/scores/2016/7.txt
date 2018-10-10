@@ -1,0 +1,5 @@
+four-dots 9! 4 4
+tetrahedron 4 4 4
+eye-of-horus 4 4 3
+three-feathers 4 5 8!
+flamingo 4 8! 4

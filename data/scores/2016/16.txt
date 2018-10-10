@@ -1,0 +1,6 @@
+four-dots 10cfb! 1 2 3 4
+tetrahedron 3 8! 2 2 14cfb!
+banana 5on 1 7! 7! 7on
+paintbrush 5 5 2
+street-lamp 1 4
+86ed 2
