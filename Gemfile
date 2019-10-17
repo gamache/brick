@@ -1,16 +1,15 @@
 source 'https://rubygems.org'
 
-gem 'rails', '~> 6.0'
-gem 'responders'
-
 gem 'sqlite3'
 gem 'pg', "~> 0.21"
 
-group :assets do
-  gem 'sass-rails'
-  gem 'coffee-rails'
-  gem 'uglifier'
-end
+gem 'sass-rails'
+gem 'sassc-rails'
+gem 'coffee-rails'
+gem 'uglifier'
+
+gem 'rails', '~> 6.0'
+gem 'responders'
 
 gem 'jquery-rails'
 gem 'haml'

@@ -184,6 +184,7 @@ DEPENDENCIES
   rails (~> 6.0)
   responders
   sass-rails
+  sassc-rails
   sqlite3
   turn
   uglifier
