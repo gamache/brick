@@ -1,5 +1,11 @@
 =====  BRICK  ===============================================================
 =====  a scoreboard website and web service for the November Games  =========
-=====  (c) triode  2009-2019  triode@ftso.net  all rights reversed  =========
+=====  (c) triode  2009-2021  triode@ftso.net  all rights reversed  =========
 
+To import a directory full of scores, do:
 
+    RAILS_ENV=production bundle exec rails c
+    irb> Season[2021].import_scores_dir('data/scores/2021')
+
+Add the year to the top of app/views/layouts/application.html.haml,
+then `touch tmp/restart.txt`.
