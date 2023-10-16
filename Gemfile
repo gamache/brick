@@ -8,7 +8,7 @@ gem 'sassc-rails'
 gem 'coffee-rails'
 gem 'uglifier'
 
-gem 'rails', '~> 6.0'
+gem 'rails', '~> 6.1.7.6'
 gem 'responders'
 
 gem 'jquery-rails'
