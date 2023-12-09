@@ -221,6 +221,9 @@ class Stats < Hash
     fifty_plus = self.keys.select{|p| self[p][:warps] >= 50}
     eligible = (sorted_players[0..51] | fifty_plus).
                   inject(Hash.new(false)) {|acc,p| acc.merge(p => true)}
+    eligible.each do |player|
+      STDERR.puts player.inspect
+    end
     [:warps, :games, :nights, :wins, :nights_won, :cfbs,
      :come_ons, :wimps, :warps_per_game, :warps_per_night,
      :games_per_night, :wins_per_game, :high_night].each do |field|
