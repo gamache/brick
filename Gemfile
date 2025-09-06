@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'sqlite3'
-gem 'pg', "~> 0.21"
+gem 'pg'
 
 gem 'sass-rails'
 gem 'sassc-rails'
